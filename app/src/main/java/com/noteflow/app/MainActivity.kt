@@ -20,7 +20,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val activityContext = this
 
         val rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -59,7 +58,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        drawingView = DrawingView(activityContext)
+        drawingView = DrawingView(this)
         canvasContainer.addView(drawingView)
         rootLayout.addView(canvasContainer)
 
@@ -76,9 +75,24 @@ class MainActivity : AppCompatActivity() {
             setBackgroundColor(0xEE2D2D2D.toInt())
         }
 
-        val btnPen = createToolbarButton(activityContext, "Pen") { drawingView.setEraser(false) }
-        val btnEraser = createToolbarButton(activityContext, "Eraser") { drawingView.setEraser(true) }
-        val btnClear = createToolbarButton(activityContext, "Clear") { drawingView.clearCanvas() }
+        val btnPen = Button(this).apply {
+            text = "Pen"
+            setTextColor(0xFFFFFFFF.toInt())
+            setBackgroundColor(0x00000000)
+            setOnClickListener { drawingView.setEraser(false) }
+        }
+        val btnEraser = Button(this).apply {
+            text = "Eraser"
+            setTextColor(0xFFFFFFFF.toInt())
+            setBackgroundColor(0x00000000)
+            setOnClickListener { drawingView.setEraser(true) }
+        }
+        val btnClear = Button(this).apply {
+            text = "Clear"
+            setTextColor(0xFFFFFFFF.toInt())
+            setBackgroundColor(0x00000000)
+            setOnClickListener { drawingView.clearCanvas() }
+        }
 
         bottomToolbar.addView(btnPen)
         bottomToolbar.addView(btnEraser)
@@ -86,15 +100,6 @@ class MainActivity : AppCompatActivity() {
 
         canvasContainer.addView(bottomToolbar)
         setContentView(rootLayout)
-    }
-
-    private fun createToolbarButton(context: Context, title: String, onClick: () -> Unit): Button {
-        return Button(context).apply {
-            text = title
-            setTextColor(0xFFFFFFFF.toInt())
-            setBackgroundColor(0x00000000)
-            setOnClickListener { onClick() }
-        }
     }
 }
 
