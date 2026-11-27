@@ -5,8 +5,10 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.os.Bundle
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -38,7 +40,7 @@ class MainActivity : AppCompatActivity() {
             )
             setBackgroundColor(0xFF1E1E1E.toInt()) // Dark minimalist top bar
             setPadding(32, 16, 32, 16)
-            gravity = android.view.Gravity.CENTER_VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
         }
 
         val backButton = ImageButton(this).apply {
@@ -70,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT,
-                android.view.Gravity.BOTTOM or android.view.Gravity.CENTER_HORIZONTAL
+                Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
             ).apply {
                 bottomMargin = 48
             }
@@ -90,8 +92,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(rootLayout)
     }
 
-    private fun createToolbarButton(title: String, onClick: () -> Unit): android.widget.Button {
-        return android.widget.Button(this).apply {
+    private fun createToolbarButton(title: String, onClick: () -> Unit): Button {
+        return Button(this).apply {
             text = title
             setTextColor(0xFFFFFFFF.toInt())
             setBackgroundColor(0x00000000)
