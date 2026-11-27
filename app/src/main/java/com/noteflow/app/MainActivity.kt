@@ -5,15 +5,15 @@ class DrawingView(context: Context) : View(context) {
     private var currentPath = Path()
     private var currentPaint = createPenPaint()
 
+    private var previousX = 0f
+    private var previousY = 0f
+
     private val gridPaint = Paint().apply {
         color = 0xFFE0E0E0.toInt()
         strokeWidth = 2f
         style = Paint.Style.STROKE
         isAntiAlias = true
     }
-
-    private var previousX = 0f
-    private var previousY = 0f
 
     private fun createPenPaint(): Paint {
         return Paint().apply {
@@ -52,10 +52,8 @@ class DrawingView(context: Context) : View(context) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // White background
         canvas.drawColor(0xFFFFFFFF.toInt())
 
-        // Draw grid
         val gridSize = 60f
 
         var x = 0f
@@ -70,12 +68,10 @@ class DrawingView(context: Context) : View(context) {
             y += gridSize
         }
 
-        // Draw completed paths
         for ((path, paint) in paths) {
             canvas.drawPath(path, paint)
         }
 
-        // Draw the active path
         canvas.drawPath(currentPath, currentPaint)
     }
 
@@ -96,8 +92,8 @@ class DrawingView(context: Context) : View(context) {
             }
 
             MotionEvent.ACTION_MOVE -> {
-                val controlX = (x + previousX) / 2f
-                val controlY = (y + previousY) / 2f
+                val controlX = (previousX + x) / 2f
+                val controlY = (previousY + y) / 2f
 
                 currentPath.quadTo(
                     previousX,
@@ -116,8 +112,6 @@ class DrawingView(context: Context) : View(context) {
             MotionEvent.ACTION_UP -> {
                 currentPath.lineTo(x, y)
 
-                // Store a copy of the paint so later changes do not affect
-                // paths that have already been drawn.
                 paths.add(
                     Pair(
                         Path(currentPath),
@@ -127,7 +121,6 @@ class DrawingView(context: Context) : View(context) {
 
                 currentPath.reset()
                 invalidate()
-                performClick()
 
                 return true
             }
@@ -139,11 +132,6 @@ class DrawingView(context: Context) : View(context) {
             }
         }
 
-        return true
-    }
-
-    override fun performClick(): Boolean {
-        super.performClick()
         return true
     }
 }
