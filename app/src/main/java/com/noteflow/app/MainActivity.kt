@@ -1,3 +1,4 @@
+
 package com.noteflow.app
 
 import android.content.Context
@@ -5,7 +6,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
-import android.os.Bundle
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -14,7 +14,7 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
-import kotlin.math.abs
+import android.os.Bundle
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,7 +41,9 @@ class MainActivity : AppCompatActivity() {
         paperParams.setMargins(dp(18), dp(24), dp(18), dp(24))
         root.addView(drawingView, paperParams)
 
+        // Back button
         val backButton = ImageButton(this)
+
         backButton.setImageResource(android.R.drawable.ic_menu_revert)
         backButton.setColorFilter(Color.WHITE)
         backButton.setBackgroundColor(Color.TRANSPARENT)
@@ -61,7 +63,9 @@ class MainActivity : AppCompatActivity() {
 
         root.addView(backButton, backParams)
 
+        // Drawing toolbar
         toolbar = LinearLayout(this)
+
         toolbar.orientation = LinearLayout.HORIZONTAL
         toolbar.gravity = Gravity.CENTER_VERTICAL
         toolbar.setPadding(dp(8), dp(8), dp(8), dp(8))
@@ -76,41 +80,54 @@ class MainActivity : AppCompatActivity() {
         toolbarParams.bottomMargin = dp(24)
         root.addView(toolbar, toolbarParams)
 
+        // Pen
         addToolButton("✎") {
             drawingView.setTool(DrawingView.Tool.PEN)
         }
 
+        // Eraser
         addToolButton("◇") {
             drawingView.setTool(DrawingView.Tool.ERASER)
         }
 
+        // Undo
         addToolButton("↶") {
             drawingView.undo()
         }
 
+        // Redo
         addToolButton("↷") {
             drawingView.redo()
         }
 
+        // Grid
         addToolButton("▦") {
             drawingView.toggleGrid()
         }
 
+        // Colour
         addToolButton("●") {
             drawingView.changeColor()
         }
 
+        // Clear
         addToolButton("⌫") {
             drawingView.clearCanvas()
         }
 
+        // Hide toolbar
         addToolButton("⌄") {
             toolbar.visibility = View.GONE
             showToolbarButton.visibility = View.VISIBLE
         }
 
+        // Show toolbar button
         showToolbarButton = ImageButton(this)
-        showToolbarButton.setImageResource(android.R.drawable.arrow_down_float)
+
+        showToolbarButton.setImageResource(
+            android.R.drawable.arrow_down_float
+        )
+
         showToolbarButton.setColorFilter(Color.BLACK)
         showToolbarButton.setBackgroundColor(Color.WHITE)
         showToolbarButton.visibility = View.GONE
@@ -145,6 +162,7 @@ class MainActivity : AppCompatActivity() {
         button.setTextColor(Color.WHITE)
         button.setBackgroundColor(Color.TRANSPARENT)
         button.setPadding(dp(8), 0, dp(8), 0)
+
         button.minWidth = 0
         button.minimumWidth = 0
 
@@ -164,6 +182,10 @@ class MainActivity : AppCompatActivity() {
 }
 
 
+// ======================================
+// DRAWING VIEW
+// ======================================
+
 class DrawingView(context: Context) : View(context) {
 
     enum class Tool {
@@ -180,11 +202,11 @@ class DrawingView(context: Context) : View(context) {
     private val undoneStrokes = mutableListOf<Stroke>()
 
     private var currentPath: Path? = null
-    private var currentPaint = createPenPaint()
     private var currentTool = Tool.PEN
 
     private var previousX = 0f
     private var previousY = 0f
+
     private var gridVisible = false
     private var colorIndex = 0
 
@@ -199,4 +221,200 @@ class DrawingView(context: Context) : View(context) {
     private val gridPaint = Paint().apply {
         color = Color.rgb(225, 225, 225)
         strokeWidth = 1f
-        style
+        style = Paint.Style.STROKE
+    }
+
+    private var currentPaint = createPenPaint()
+
+    private fun createPenPaint(): Paint {
+        return Paint().apply {
+            color = colors[colorIndex]
+            strokeWidth = 4f
+            style = Paint.Style.STROKE
+            strokeCap = Paint.Cap.ROUND
+            strokeJoin = Paint.Join.ROUND
+            isAntiAlias = true
+        }
+    }
+
+    init {
+        setBackgroundColor(Color.WHITE)
+        isFocusable = true
+    }
+
+    // Select pen or eraser
+    fun setTool(tool: Tool) {
+        currentTool = tool
+
+        currentPaint = createPenPaint()
+
+        if (tool == Tool.ERASER) {
+            currentPaint.color = Color.WHITE
+            currentPaint.strokeWidth = 30f
+        }
+
+        invalidate()
+    }
+
+    // Change pen colour
+    fun changeColor() {
+        colorIndex = (colorIndex + 1) % colors.size
+
+        if (currentTool == Tool.PEN) {
+            currentPaint = createPenPaint()
+        }
+
+        invalidate()
+    }
+
+    // Toggle grid
+    fun toggleGrid() {
+        gridVisible = !gridVisible
+        invalidate()
+    }
+
+    // Undo
+    fun undo() {
+        if (strokes.isNotEmpty()) {
+            undoneStrokes.add(strokes.removeAt(strokes.lastIndex))
+            invalidate()
+        }
+    }
+
+    // Redo
+    fun redo() {
+        if (undoneStrokes.isNotEmpty()) {
+            strokes.add(undoneStrokes.removeAt(undoneStrokes.lastIndex))
+            invalidate()
+        }
+    }
+
+    // Clear entire page
+    fun clearCanvas() {
+        strokes.clear()
+        undoneStrokes.clear()
+        currentPath = null
+        invalidate()
+    }
+
+    // Draw everything
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+
+        canvas.drawColor(Color.WHITE)
+
+        // Draw grid
+        if (gridVisible) {
+            val spacing = 60f
+
+            var x = 0f
+
+            while (x < width) {
+                canvas.drawLine(
+                    x, 0f, x, height.toFloat(), gridPaint
+                )
+                x += spacing
+            }
+
+            var y = 0f
+
+            while (y < height) {
+                canvas.drawLine(
+                    0f, y, width.toFloat(), y, gridPaint
+                )
+                y += spacing
+            }
+        }
+
+        // Draw saved strokes
+        for (stroke in strokes) {
+            canvas.drawPath(stroke.path, stroke.paint)
+        }
+
+        // Draw current stroke
+        currentPath?.let {
+            canvas.drawPath(it, currentPaint)
+        }
+    }
+
+    // Handle finger and stylus input
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+
+        val x = event.x
+        val y = event.y
+
+        when (event.action) {
+
+            MotionEvent.ACTION_DOWN -> {
+
+                currentPath = Path()
+
+                currentPath?.moveTo(x, y)
+
+                previousX = x
+                previousY = y
+
+                invalidate()
+
+                return true
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+
+                currentPath?.quadTo(
+                    previousX,
+                    previousY,
+                    (x + previousX) / 2f,
+                    (y + previousY) / 2f
+                )
+
+                previousX = x
+                previousY = y
+
+                invalidate()
+
+                return true
+            }
+
+            MotionEvent.ACTION_UP -> {
+
+                currentPath?.lineTo(x, y)
+
+                currentPath?.let {
+                    strokes.add(
+                        Stroke(
+                            Path(it),
+                            Paint(currentPaint)
+                        )
+                    )
+                }
+
+                currentPath = null
+
+                // New drawing clears redo history
+                undoneStrokes.clear()
+
+                invalidate()
+
+                performClick()
+
+                return true
+            }
+
+            MotionEvent.ACTION_CANCEL -> {
+
+                currentPath = null
+                invalidate()
+
+                return true
+            }
+        }
+
+        return true
+    }
+
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
+    }
+}
