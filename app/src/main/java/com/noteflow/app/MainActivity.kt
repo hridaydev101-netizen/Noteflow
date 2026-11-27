@@ -21,24 +21,22 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Root layout: Clean white background with grid
         val rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
             )
-            setBackgroundColor(0xFFFFFFFF.toInt()) // Pure white background
+            setBackgroundColor(0xFFFFFFFF.toInt())
         }
 
-        // Top Navigation Bar
         val topBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 120
             )
-            setBackgroundColor(0xFF1E1E1E.toInt()) // Dark minimalist top bar
+            setBackgroundColor(0xFF1E1E1E.toInt())
             setPadding(32, 16, 32, 16)
             gravity = Gravity.CENTER_VERTICAL
         }
@@ -50,10 +48,8 @@ class MainActivity : AppCompatActivity() {
             setOnClickListener { finish() }
         }
         topBar.addView(backButton)
-
         rootLayout.addView(topBar)
 
-        // Drawing Canvas Container
         val canvasContainer = FrameLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -66,7 +62,6 @@ class MainActivity : AppCompatActivity() {
         canvasContainer.addView(drawingView)
         rootLayout.addView(canvasContainer)
 
-        // Floating Bottom Toolbar
         val bottomToolbar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = FrameLayout.LayoutParams(
@@ -77,7 +72,7 @@ class MainActivity : AppCompatActivity() {
                 bottomMargin = 48
             }
             setPadding(24, 16, 24, 16)
-            setBackgroundColor(0xEE2D2D2D.toInt()) // Floating dark translucent bar
+            setBackgroundColor(0xEE2D2D2D.toInt())
         }
 
         val btnPen = createToolbarButton("Pen") { drawingView.setEraser(false) }
@@ -102,9 +97,6 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-/**
- * Custom Drawing View with Grid Background & Smooth Bezier Curves (No Jitter)
- */
 class DrawingView(context: Context) : View(context) {
 
     private val paths = mutableListOf<Pair<Path, Paint>>()
@@ -112,7 +104,7 @@ class DrawingView(context: Context) : View(context) {
     private var currentPaint = createPenPaint()
 
     private val gridPaint = Paint().apply {
-        color = 0xFFE0E0E0.toInt() // Light grey grid lines
+        color = 0xFFE0E0E0.toInt()
         strokeWidth = 2f
         style = Paint.Style.STROKE
     }
@@ -122,7 +114,7 @@ class DrawingView(context: Context) : View(context) {
 
     private fun createPenPaint(): Paint {
         return Paint().apply {
-            color = 0xFF111111.toInt() // Dark sleek ink
+            color = 0xFF111111.toInt()
             isAntiAlias = true
             isDither = true
             style = Paint.Style.STROKE
@@ -135,7 +127,7 @@ class DrawingView(context: Context) : View(context) {
     fun setEraser(isEraser: Boolean) {
         currentPaint = if (isEraser) {
             Paint().apply {
-                color = 0xFFFFFFFF.toInt() // Erase by painting white
+                color = 0xFFFFFFFF.toInt()
                 isAntiAlias = true
                 style = Paint.Style.STROKE
                 strokeJoin = Paint.Join.ROUND
@@ -155,7 +147,6 @@ class DrawingView(context: Context) : View(context) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // Draw Graph Grid Background
         val gridSize = 60f
         var x = 0f
         while (x < width) {
@@ -168,7 +159,6 @@ class DrawingView(context: Context) : View(context) {
             y += gridSize
         }
 
-        // Draw all saved paths smoothly
         for ((path, paint) in paths) {
             canvas.drawPath(path, paint)
         }
@@ -188,7 +178,6 @@ class DrawingView(context: Context) : View(context) {
                 invalidate()
             }
             MotionEvent.ACTION_MOVE -> {
-                // Smooth lines using Quadratic Bezier Curves (eliminates jitter)
                 val controlX = (x + x1) / 2
                 val controlY = (y + y1) / 2
                 currentPath.quadTo(x1, y1, controlX, controlY)
