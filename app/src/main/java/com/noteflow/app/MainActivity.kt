@@ -21,84 +21,79 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val rootLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-            )
-            setBackgroundColor(0xFFFFFFFF.toInt())
-        }
+        val rootLayout = LinearLayout(this)
+        rootLayout.orientation = LinearLayout.VERTICAL
+        rootLayout.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        rootLayout.setBackgroundColor(0xFFFFFFFF.toInt())
 
-        val topBar = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                120
-            )
-            setBackgroundColor(0xFF1E1E1E.toInt())
-            setPadding(32, 16, 32, 16)
-            gravity = Gravity.CENTER_VERTICAL
-        }
+        val topBar = LinearLayout(this)
+        topBar.orientation = LinearLayout.HORIZONTAL
+        topBar.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            120
+        )
+        topBar.setBackgroundColor(0xFF1E1E1E.toInt())
+        topBar.setPadding(32, 16, 32, 16)
+        topBar.gravity = Gravity.CENTER_VERTICAL
 
-        val backButton = ImageButton(this).apply {
-            setImageResource(android.R.drawable.ic_menu_revert)
-            setBackgroundColor(0x00000000)
-            setColorFilter(0xFFFFFFFF.toInt())
-            setOnClickListener { finish() }
-        }
+        val backButton = ImageButton(this)
+        backButton.setImageResource(android.R.drawable.ic_menu_revert)
+        backButton.setBackgroundColor(0x00000000)
+        backButton.setColorFilter(0xFFFFFFFF.toInt())
+        backButton.setOnClickListener { finish() }
         topBar.addView(backButton)
         rootLayout.addView(topBar)
 
-        val canvasContainer = FrameLayout(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                0,
-                1.0f
-            )
-        }
+        val canvasContainer = FrameLayout(this)
+        canvasContainer.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            0,
+            1.0f
+        )
 
         drawingView = DrawingView(this)
         canvasContainer.addView(drawingView)
         rootLayout.addView(canvasContainer)
 
-        val bottomToolbar = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-            ).apply {
-                bottomMargin = 48
-            }
-            setPadding(24, 16, 24, 16)
-            setBackgroundColor(0xEE2D2D2D.toInt())
-        }
+        val bottomToolbar = LinearLayout(this)
+        bottomToolbar.orientation = LinearLayout.HORIZONTAL
+        val toolbarParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+        )
+        toolbarParams.bottomMargin = 48
+        bottomToolbar.layoutParams = toolbarParams
+        bottomToolbar.setPadding(24, 16, 24, 16)
+        bottomToolbar.setBackgroundColor(0xEE2D2D2D.toInt())
 
-        val btnPen = Button(this).apply {
-            text = "Pen"
-            setTextColor(0xFFFFFFFF.toInt())
-            setBackgroundColor(0x00000000)
-            setOnClickListener { drawingView.setEraser(false) }
-        }
-        val btnEraser = Button(this).apply {
-            text = "Eraser"
-            setTextColor(0xFFFFFFFF.toInt())
-            setBackgroundColor(0x00000000)
-            setOnClickListener { drawingView.setEraser(true) }
-        }
-        val btnClear = Button(this).apply {
-            text = "Clear"
-            setTextColor(0xFFFFFFFF.toInt())
-            setBackgroundColor(0x00000000)
-            setOnClickListener { drawingView.clearCanvas() }
-        }
+        val btnPen = Button(this)
+        btnPen.text = "Pen"
+        btnPen.setTextColor(0xFFFFFFFF.toInt())
+        btnPen.setBackgroundColor(0x00000000)
+        btnPen.setOnClickListener { drawingView.setEraser(false) }
+
+        val btnEraser = Button(this)
+        btnEraser.text = "Eraser"
+        btnEraser.setTextColor(0xFFFFFFFF.toInt())
+        btnEraser.setBackgroundColor(0x00000000)
+        btnEraser.setOnClickListener { drawingView.setEraser(true) }
+
+        val btnClear = Button(this)
+        btnClear.text = "Clear"
+        btnClear.setTextColor(0xFFFFFFFF.toInt())
+        btnClear.setBackgroundColor(0x00000000)
+        btnClear.setOnClickListener { drawingView.clearCanvas() }
 
         bottomToolbar.addView(btnPen)
         bottomToolbar.addView(btnEraser)
         bottomToolbar.addView(btnClear)
 
         canvasContainer.addView(bottomToolbar)
+        
         setContentView(rootLayout)
     }
 }
@@ -186,18 +181,5 @@ class DrawingView(context: Context) : View(context) {
             MotionEvent.ACTION_MOVE -> {
                 val controlX = (x + x1) / 2
                 val controlY = (y + y1) / 2
-                currentPath.quadTo(x1, y1, controlX, controlY)
-                x1 = x
-                y1 = y
-                invalidate()
-            }
-            MotionEvent.ACTION_UP -> {
-                currentPath.lineTo(x, y)
-                paths.add(Pair(currentPath, currentPaint))
-                currentPath = Path()
-                invalidate()
-            }
-        }
-        return true
-    }
-}
+                currentPath.quadTo(x1, y1, controlX, control
+            
