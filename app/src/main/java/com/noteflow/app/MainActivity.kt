@@ -25,6 +25,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        window.statusBarColor = Color.rgb(35, 35, 35)
+        window.navigationBarColor = Color.rgb(25, 25, 25)
+
         val root = FrameLayout(this)
         root.setBackgroundColor(Color.rgb(35, 35, 35))
 
@@ -42,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         backButton.setImageResource(android.R.drawable.ic_menu_revert)
         backButton.setColorFilter(Color.WHITE)
         backButton.setBackgroundColor(Color.TRANSPARENT)
+
         backButton.setOnClickListener {
             finish()
         }
@@ -53,7 +57,8 @@ class MainActivity : AppCompatActivity() {
         )
 
         backParams.leftMargin = dp(20)
-        backParams.topMargin = dp(30)
+        backParams.topMargin = dp(28)
+
         root.addView(backButton, backParams)
 
         toolbar = LinearLayout(this)
@@ -68,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
         )
 
-        toolbarParams.bottomMargin = dp(26)
+        toolbarParams.bottomMargin = dp(24)
         root.addView(toolbar, toolbarParams)
 
         addToolButton("✎") {
@@ -107,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         showToolbarButton = ImageButton(this)
         showToolbarButton.setImageResource(android.R.drawable.arrow_down_float)
         showToolbarButton.setColorFilter(Color.BLACK)
-        showToolbarButton.setBackgroundColor(Color.TRANSPARENT)
+        showToolbarButton.setBackgroundColor(Color.WHITE)
         showToolbarButton.visibility = View.GONE
 
         val showButtonParams = FrameLayout.LayoutParams(
@@ -117,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         showButtonParams.rightMargin = dp(24)
-        showButtonParams.bottomMargin = dp(30)
+        showButtonParams.bottomMargin = dp(28)
 
         showToolbarButton.setOnClickListener {
             toolbar.visibility = View.VISIBLE
@@ -130,11 +135,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addToolButton(
-        textValue: String,
+        symbol: String,
         action: () -> Unit
     ) {
         val button = Button(this)
-        button.text = textValue
+
+        button.text = symbol
         button.textSize = 24f
         button.setTextColor(Color.WHITE)
         button.setBackgroundColor(Color.TRANSPARENT)
@@ -193,187 +199,4 @@ class DrawingView(context: Context) : View(context) {
     private val gridPaint = Paint().apply {
         color = Color.rgb(225, 225, 225)
         strokeWidth = 1f
-        style = Paint.Style.STROKE
-    }
-
-    init {
-        setBackgroundColor(Color.WHITE)
-    }
-
-    private fun createPenPaint(): Paint {
-        return Paint().apply {
-            color = colors[colorIndex]
-            style = Paint.Style.STROKE
-            strokeWidth = 6f
-            strokeCap = Paint.Cap.ROUND
-            strokeJoin = Paint.Join.ROUND
-            isAntiAlias = true
-        }
-    }
-
-    private fun createEraserPaint(): Paint {
-        return Paint().apply {
-            color = Color.WHITE
-            style = Paint.Style.STROKE
-            strokeWidth = 42f
-            strokeCap = Paint.Cap.ROUND
-            strokeJoin = Paint.Join.ROUND
-            isAntiAlias = true
-        }
-    }
-
-    fun setTool(tool: Tool) {
-        currentTool = tool
-
-        currentPaint = when (tool) {
-            Tool.PEN -> createPenPaint()
-            Tool.ERASER -> createEraserPaint()
-        }
-
-        invalidate()
-    }
-
-    fun changeColor() {
-        colorIndex++
-
-        if (colorIndex >= colors.size) {
-            colorIndex = 0
-        }
-
-        if (currentTool == Tool.PEN) {
-            currentPaint = createPenPaint()
-        }
-
-        invalidate()
-    }
-
-    fun toggleGrid() {
-        gridVisible = !gridVisible
-        invalidate()
-    }
-
-    fun clearCanvas() {
-        strokes.clear()
-        undoneStrokes.clear()
-        currentPath = null
-        invalidate()
-    }
-
-    fun undo() {
-        if (strokes.isNotEmpty()) {
-            undoneStrokes.add(strokes.removeAt(strokes.lastIndex))
-            invalidate()
-        }
-    }
-
-    fun redo() {
-        if (undoneStrokes.isNotEmpty()) {
-            strokes.add(undoneStrokes.removeAt(undoneStrokes.lastIndex))
-            invalidate()
-        }
-    }
-
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-
-        canvas.drawColor(Color.WHITE)
-
-        if (gridVisible) {
-            drawGrid(canvas)
-        }
-
-        for (stroke in strokes) {
-            canvas.drawPath(stroke.path, stroke.paint)
-        }
-
-        val path = currentPath
-        if (path != null) {
-            canvas.drawPath(path, currentPaint)
-        }
-    }
-
-    private fun drawGrid(canvas: Canvas) {
-        val gridSize = 60f
-
-        var x = 0f
-        while (x < width) {
-            canvas.drawLine(x, 0f, x, height.toFloat(), gridPaint)
-            x += gridSize
-        }
-
-        var y = 0f
-        while (y < height) {
-            canvas.drawLine(0f, y, width.toFloat(), y, gridPaint)
-            y += gridSize
-        }
-    }
-
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        val x = event.x
-        val y = event.y
-
-        when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                currentPath = Path()
-                currentPath?.moveTo(x, y)
-
-                previousX = x
-                previousY = y
-                undoneStrokes.clear()
-
-                invalidate()
-                return true
-            }
-
-            MotionEvent.ACTION_MOVE -> {
-                val path = currentPath ?: return true
-
-                if (abs(x - previousX) > 1f || abs(y - previousY) > 1f) {
-                    val middleX = (previousX + x) / 2f
-                    val middleY = (previousY + y) / 2f
-
-                    path.quadTo(
-                        previousX,
-                        previousY,
-                        middleX,
-                        middleY
-                    )
-
-                    previousX = x
-                    previousY = y
-
-                    invalidate()
-                }
-
-                return true
-            }
-
-            MotionEvent.ACTION_UP -> {
-                val path = currentPath
-
-                if (path != null) {
-                    path.lineTo(x, y)
-
-                    strokes.add(
-                        Stroke(
-                            Path(path),
-                            Paint(currentPaint)
-                        )
-                    )
-                }
-
-                currentPath = null
-                invalidate()
-                return true
-            }
-
-            MotionEvent.ACTION_CANCEL -> {
-                currentPath = null
-                invalidate()
-                return true
-            }
-        }
-
-        return true
-    }
-}
+        style
